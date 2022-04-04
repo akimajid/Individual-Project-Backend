@@ -18,6 +18,10 @@ app.get("/", (req, res) => {
     res.send("<h1>Individual project API</h1>")
 })
 
+const { authRoutes } = require("./routes")
+
+app.use("/auth", authRoutes)
+
 app.listen(PORT, () => {
     console.log("Listening in port", PORT)
 })

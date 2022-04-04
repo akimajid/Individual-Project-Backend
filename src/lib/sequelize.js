@@ -6,10 +6,14 @@ const sequelize = new Sequelize({
     password: mysqlConfig.MYSQL_PASSWORD,
     database: mysqlConfig.MYSQL_DB_NAME,
     port: 3306,
-    dialect: "mysql"
+    dialect: "mysql",
+    logging: false
 })
+
+// Models
+const User = require("../models/user")(sequelize)
 
 module.exports = {
     sequelize,
-    
+    User
 }
