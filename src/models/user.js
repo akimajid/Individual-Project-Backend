@@ -22,6 +22,14 @@ const User = (sequelize) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    role: {
+      type: DataTypes.STRING,
+      defaultValue: "user",
+    },
+    last_login: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   });
 };
 

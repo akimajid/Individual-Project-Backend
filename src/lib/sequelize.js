@@ -12,8 +12,14 @@ const sequelize = new Sequelize({
 
 // Models
 const User = require("../models/user")(sequelize)
+const Session = require("../models/session")(sequelize)
+
+// Assosiations
+Session.belongsTo(User, { foreignKey: "user_id" })
+User.hasMany(Session, { foreignKey: "user_id" })
 
 module.exports = {
     sequelize,
-    User
+    User,
+    Session
 }
