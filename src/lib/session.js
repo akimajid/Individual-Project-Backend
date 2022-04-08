@@ -16,6 +16,6 @@ const verifySession = async (token) => {
   return findSession;
 };
 
-module.export = {
-  verifySession,
-};
+module.exports = {
+  verifySession
+}
