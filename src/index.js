@@ -18,9 +18,13 @@ app.get("/", (req, res) => {
     res.send("<h1>Individual project API</h1>")
 })
 
-const { authRoutes } = require("./routes")
+const { authRoutes, postsRoutes } = require("./routes/index")
+
+app.use("/post_images", express.static(`${__dirname}/public/posts`))
+app.use("/profile_pictures", express.static(`${__dirname}/public/profile_pictures`))
 
 app.use("/auth", authRoutes)
+app.use("/posts", postsRoutes)
 
 app.listen(PORT, () => {
     console.log("Listening in port", PORT)
