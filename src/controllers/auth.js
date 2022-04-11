@@ -3,6 +3,7 @@ const { User, Session } = require("../lib/sequelize");
 const bcrypt = require("bcrypt");
 const { nanoid } = require("nanoid");
 const moment = require("moment");
+const mailer = require("../lib/mailer");
 
 const authControllers = {
   registerUser: async (req, res) => {
@@ -78,6 +79,12 @@ const authControllers = {
       );
 
       const sessionToken = nanoid(64);
+
+      await mailer({
+        to: "monpai732@gmail.com",
+        subject: "Logged in user",
+        text: "An account using your email has has logged in"
+      })
 
       await Session.create({
         user_id: findUser.id,
