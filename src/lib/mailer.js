@@ -6,16 +6,12 @@ const mailer = async ({
     text,
     html
 }) => {
-    // const testAccount = await nodemailer.createTestAccount()
     const transport = nodemailer.createTransport({
         auth: {
-            user: "nitroa198@gmail.com",
-            pass: "Nitro5acer."
-            // user: testAccount.user,
-            // pass: testAccount.pass
+            user: process.env.NODEMAILER_USER,
+            pass: process.env.NODEMAILER_PASS
         },
         host: "smtp.gmail.com"
-        // host: "smtp.ethereal.email"
     })
 
     await transport.sendMail({

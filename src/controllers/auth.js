@@ -80,11 +80,11 @@ const authControllers = {
 
       const sessionToken = nanoid(64);
 
-      await mailer({
-        to: "monpai732@gmail.com",
-        subject: "Logged in user",
-        text: "An account using your email has has logged in"
-      })
+      // await mailer({
+      //   to: "monpai732@gmail.com",
+      //   subject: "Logged in user",
+      //   text: "An account using your email has has logged in"
+      // })
 
       await Session.create({
         user_id: findUser.id,

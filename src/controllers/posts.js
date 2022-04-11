@@ -33,7 +33,7 @@ const postControllers = {
         image_url: `${uploadFileDomain}/${filePath}/${filename}`,
         caption,
         location,
-        user_id: req.token.id,
+        user_id: req.token.user_id,
       });
 
       return res.status(201).json({

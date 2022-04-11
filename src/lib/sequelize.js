@@ -20,8 +20,8 @@ const Like = require("../models/like")(sequelize)
 Session.belongsTo(User, { foreignKey: "user_id" })
 User.hasMany(Session, { foreignKey: "user_id" })
 
-Post.belongsTo(User, { foreignKey: "user_id", as: "user_post" })
-User.hasMany(Post, { foreignKey: "user_id", as: "user_post" })
+Post.belongsTo(User, { foreignKey: "user_id", as: "user_post", onUpdate: "SET NULL", onDelete: "SET NULL" })
+User.hasMany(Post, { foreignKey: "user_id", as: "user_post", onUpdate: "SET NULL", onDelete: "SET NULL" })
 
 Post.belongsToMany(User, { through: Like, foreignKey: "post_id", as: "user_likes" })
 User.belongsToMany(Post, { through: Like, foreignKey: "user_id", as: "user_likes" })
