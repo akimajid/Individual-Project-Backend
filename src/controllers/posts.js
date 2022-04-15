@@ -6,14 +6,38 @@ const fileUploader = require("../lib/uploader");
 const postControllers = {
   getAllPosts: async (req, res) => {
     try {
-      const postDAO = new DAO(Post);
+      const { _limit = 30, _page = 1, _sortBy = "", _sortDir = "" } = req.query
 
-      const findPosts = await postDAO.findAndCountAll(req.query);
+      delete req.query._limit
+      delete req.query._page
+      delete req.query._sortBy
+      delete req.query._sortDir
+
+      const findPosts = await Post.findAndCountAll({
+        where: {
+          ...req.query
+        },
+        limit: _limit ? parseInt(_limit) : undefined,
+        offset: (_page - 1) * _limit,
+        include: [
+          {
+            model: User,
+            attributes: ["username"],
+            as: "user_post"
+          },
+          {
+            model: User,
+            as: "user_likes"
+          }
+        ],
+        distinct: true,
+        order: _sortBy ? [[_sortBy, _sortDir]] : undefined
+      })
 
       return res.status(200).json({
-        message: "Get all posts",
-        result: findPosts,
-      });
+        message: "Find posts",
+        result: findPosts
+      })
     } catch (err) {
       console.log(err);
       return res.status(500).json({
