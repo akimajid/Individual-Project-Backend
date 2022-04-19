@@ -1,21 +1,19 @@
-const { Post, User, Like } = require("../lib/sequelize");
+const { Post, User, Like, Comment } = require("../lib/sequelize");
 const fs = require("fs");
-const DAO = require("../lib/dao");
-const fileUploader = require("../lib/uploader");
 
 const postControllers = {
   getAllPosts: async (req, res) => {
     try {
-      const { _limit = 30, _page = 1, _sortBy = "", _sortDir = "" } = req.query
+      const { _limit = 30, _page = 1, _sortBy = "", _sortDir = "" } = req.query;
 
-      delete req.query._limit
-      delete req.query._page
-      delete req.query._sortBy
-      delete req.query._sortDir
+      delete req.query._limit;
+      delete req.query._page;
+      delete req.query._sortBy;
+      delete req.query._sortDir;
 
       const findPosts = await Post.findAndCountAll({
         where: {
-          ...req.query
+          ...req.query,
         },
         limit: _limit ? parseInt(_limit) : undefined,
         offset: (_page - 1) * _limit,
@@ -23,21 +21,21 @@ const postControllers = {
           {
             model: User,
             attributes: ["username"],
-            as: "user_post"
+            as: "user_post",
           },
           {
             model: User,
-            as: "user_likes"
-          }
+            as: "user_likes",
+          },
         ],
         distinct: true,
-        order: _sortBy ? [[_sortBy, _sortDir]] : undefined
-      })
+        order: _sortBy ? [[_sortBy, _sortDir]] : undefined,
+      });
 
       return res.status(200).json({
         message: "Find posts",
-        result: findPosts
-      })
+        result: findPosts,
+      });
     } catch (err) {
       console.log(err);
       return res.status(500).json({
@@ -173,6 +171,139 @@ const postControllers = {
 
       return res.status(200).json({
         message: "Liked post",
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({
+        message: "Server error",
+      });
+    }
+  },
+  getPostComment: async (req, res) => {
+    try {
+      const { postId } = req.params;
+
+      const findPost = await Post.findOne({
+        where: {
+          id: postId,
+        },
+      });
+
+      if (!findPost) {
+        return res.status(400).json({
+          message: "Post not found",
+        });
+      }
+
+      const getComment = await Comment.findAll({
+        where: {
+          post_id: postId,
+        },
+      });
+
+      return res.status(200).json({
+        message: "Found comment",
+        result: getComment,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({
+        message: "Server error",
+      });
+    }
+  },
+  createPostComment: async (req, res) => {
+    try {
+      const { postId } = req.params;
+      const { content, user_id } = req.body;
+
+      const findPost = await Post.findOne({
+        where: {
+          id: postId,
+        },
+      });
+
+      if (!findPost) {
+        return res.status(400).json({
+          message: "User not found",
+        });
+      }
+
+      const findUser = await User.findOne({
+        where: {
+          id: user_id,
+        },
+      });
+
+      if (!findUser) {
+        return res.status(400).json({
+          message: "Post not found",
+        });
+      }
+
+      const addComment = await Comment.create({
+        content,
+        user_id,
+        post_id: postId,
+      });
+
+      return res.status(201).json({
+        message: "Comment created",
+        result: addComment,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({
+        message: "Server error",
+      });
+    }
+  },
+  getPostById: async (req, res) => {
+    try {
+      const { postId } = req.params;
+
+      const findPost = await Post.findOne({
+        where: {
+          id: postId,
+        },
+        include: [
+          {
+            model: User,
+            as: "user_post",
+          },
+        ],
+      });
+
+      return res.status(200).json({
+        message: "Post found",
+        result: findPost,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({
+        message: "Server error",
+      });
+    }
+  },
+  getPostByUserId: async (req, res) => {
+    try {
+      const { userId } = req.params;
+
+      const findPost = await Post.findAll({
+        where: {
+          user_id: userId,
+        },
+        include: [
+          {
+            model: User,
+            as: "user_post",
+          },
+        ],
+      });
+
+      return res.status(200).json({
+        message: "Post found",
+        result: findPost,
       });
     } catch (err) {
       console.log(err);

@@ -19,6 +19,7 @@ const VerificationToken = require("../models/verification_token")(sequelize);
 const ForgotPasswordToken = require("../models/forgot_password_token")(
   sequelize
 );
+const Comment = require("../models/comment")(sequelize)
 
 // Assosiations
 Session.belongsTo(User, { foreignKey: "user_id" });
@@ -57,6 +58,11 @@ User.hasMany(VerificationToken, { foreignKey: "user_id" });
 ForgotPasswordToken.belongsTo(User, { foreignKey: "user_id" });
 User.hasMany(ForgotPasswordToken, { foreignKey: "user_id" });
 
+User.hasMany(Comment, { foreignKey: "user_id" })
+Comment.belongsTo(User, { foreignKey: "user_id" })
+Comment.belongsTo(Post, { foreignKey: "post_id" })
+Post.hasMany(Comment, { foreignKey: "post_id" })
+
 module.exports = {
   sequelize,
   User,
@@ -65,4 +71,5 @@ module.exports = {
   Like,
   VerificationToken,
   ForgotPasswordToken,
+  Comment
 };

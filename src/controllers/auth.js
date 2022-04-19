@@ -66,7 +66,7 @@ const authControllers = {
       });
 
       return res.status(201).json({
-        message: "Server error",
+        message: "Registered user",
       });
     } catch (err) {
       console.log(err);
