@@ -30,6 +30,12 @@ const User = (sequelize) => {
       type: DataTypes.DATE,
       allowNull: true,
     },
+    profile_picture: {
+      type: DataTypes.STRING
+    },
+    bio: {
+      type: DataTypes.STRING
+    }
   });
 };
 

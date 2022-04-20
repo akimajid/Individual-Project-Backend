@@ -3,3 +3,4 @@ node_modules
 .env
 
 src/public/posts**
+src/public/profile_picture**

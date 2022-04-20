@@ -20,7 +20,7 @@ const postControllers = {
         include: [
           {
             model: User,
-            attributes: ["username"],
+            attributes: ["username", "profile_picture"],
             as: "user_post",
           },
           {
