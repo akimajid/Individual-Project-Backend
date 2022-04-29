@@ -19,8 +19,6 @@ router.patch("/:id", sessionAuthorizeLoggedInUser, postControllers.editPostById)
 router.delete("/:id", sessionAuthorizeLoggedInUser, postControllers.deletePostById);
 router.get("/:id/likes", postControllers.getLikePost);
 router.post("/:postId/likes/:userId", postControllers.likePost);
-router.get("/:postId/comment", postControllers.getPostComment)
-router.post("/:postId/comment", sessionAuthorizeLoggedInUser, postControllers.createPostComment)
 router.get("/:postId", postControllers.getPostById)
 router.get("/user/:userId", postControllers.getPostByUserId)
 

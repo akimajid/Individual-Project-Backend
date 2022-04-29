@@ -19,49 +19,27 @@ const VerificationToken = require("../models/verification_token")(sequelize);
 const ForgotPasswordToken = require("../models/forgot_password_token")(
   sequelize
 );
-const Comment = require("../models/comment")(sequelize)
+const Comment = require("../models/comment")(sequelize);
 
 // Assosiations
+User.hasMany(Post, { foreignKey: "user_id" });
+Post.belongsTo(User, { foreignKey: "user_id" });
+
+Like.belongsTo(User, { foreignKey: "user_id" });
+User.hasMany(Like, { foreignKey: "user_id" });
+Like.belongsTo(Post, { foreignKey: "post_id" });
+Post.hasMany(Like, { foreignKey: "post_id" });
+
 Session.belongsTo(User, { foreignKey: "user_id" });
 User.hasMany(Session, { foreignKey: "user_id" });
-
-Post.belongsTo(User, {
-  foreignKey: "user_id",
-  as: "user_post",
-  onUpdate: "SET NULL",
-  onDelete: "SET NULL",
-});
-User.hasMany(Post, {
-  foreignKey: "user_id",
-  as: "user_post",
-  onUpdate: "SET NULL",
-  onDelete: "SET NULL",
-});
-Post.belongsToMany(User, {
-  through: Like,
-  foreignKey: "post_id",
-  as: "user_likes",
-});
-User.belongsToMany(Post, {
-  through: Like,
-  foreignKey: "user_id",
-  as: "user_likes",
-});
-User.hasMany(Like, { foreignKey: "user_id" });
-Like.belongsTo(User, { foreignKey: "user_id" });
-Post.hasMany(Like, { foreignKey: "post_id" });
-Like.belongsTo(Post, { foreignKey: "post_id" });
-
-VerificationToken.belongsTo(User, { foreignKey: "user_id" });
-User.hasMany(VerificationToken, { foreignKey: "user_id" });
 
 ForgotPasswordToken.belongsTo(User, { foreignKey: "user_id" });
 User.hasMany(ForgotPasswordToken, { foreignKey: "user_id" });
 
-User.hasMany(Comment, { foreignKey: "user_id" })
-Comment.belongsTo(User, { foreignKey: "user_id" })
-Comment.belongsTo(Post, { foreignKey: "post_id" })
-Post.hasMany(Comment, { foreignKey: "post_id" })
+User.hasMany(Comment, { foreignKey: "user_id" });
+Comment.belongsTo(User, { foreignKey: "user_id" });
+Comment.belongsTo(Post, { foreignKey: "post_id" });
+Post.hasMany(Comment, { foreignKey: "post_id" });
 
 module.exports = {
   sequelize,
@@ -71,5 +49,5 @@ module.exports = {
   Like,
   VerificationToken,
   ForgotPasswordToken,
-  Comment
+  Comment,
 };

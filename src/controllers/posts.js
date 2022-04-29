@@ -15,17 +15,16 @@ const postControllers = {
         where: {
           ...req.query,
         },
+        order: [["createdAt", "DESC"]],
         limit: _limit ? parseInt(_limit) : undefined,
         offset: (_page - 1) * _limit,
         include: [
           {
             model: User,
-            attributes: ["username", "profile_picture"],
-            as: "user_post",
           },
           {
-            model: User,
-            as: "user_likes",
+            model: Comment,
+            order: [["createdAt", "DESC"]],
           },
         ],
         distinct: true,
@@ -81,7 +80,7 @@ const postControllers = {
         {
           where: {
             id,
-            user_id: req.token.id,
+            user_id: req.token.user_id,
           },
         }
       );
@@ -179,89 +178,13 @@ const postControllers = {
       });
     }
   },
-  getPostComment: async (req, res) => {
-    try {
-      const { postId } = req.params;
-
-      const findPost = await Post.findOne({
-        where: {
-          id: postId,
-        },
-      });
-
-      if (!findPost) {
-        return res.status(400).json({
-          message: "Post not found",
-        });
-      }
-
-      const getComment = await Comment.findAll({
-        where: {
-          post_id: postId,
-        },
-      });
-
-      return res.status(200).json({
-        message: "Found comment",
-        result: getComment,
-      });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).json({
-        message: "Server error",
-      });
-    }
-  },
-  createPostComment: async (req, res) => {
-    try {
-      const { postId } = req.params;
-      const { content, user_id } = req.body;
-
-      const findPost = await Post.findOne({
-        where: {
-          id: postId,
-        },
-      });
-
-      if (!findPost) {
-        return res.status(400).json({
-          message: "User not found",
-        });
-      }
-
-      const findUser = await User.findOne({
-        where: {
-          id: user_id,
-        },
-      });
-
-      if (!findUser) {
-        return res.status(400).json({
-          message: "Post not found",
-        });
-      }
-
-      const addComment = await Comment.create({
-        content,
-        user_id,
-        post_id: postId,
-      });
-
-      return res.status(201).json({
-        message: "Comment created",
-        result: addComment,
-      });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).json({
-        message: "Server error",
-      });
-    }
-  },
   getPostById: async (req, res) => {
     try {
-      const { postId } = req.params;
+      const { _limit = 5, _page = 1 } = req.query;
 
+      delete req.query._limit;
+      delete req.query._page;
+      const { postId } = req.params;
       const findPost = await Post.findOne({
         where: {
           id: postId,
@@ -269,14 +192,33 @@ const postControllers = {
         include: [
           {
             model: User,
-            as: "user_post",
+          },
+          {
+            model: Comment,
+          },
+        ],
+      });
+
+      const findComment = await Comment.findAll({
+        where: {
+          post_id: postId,
+        },
+        order: [["createdAt", "DESC"]],
+        limit: _limit ? parseInt(_limit) : undefined,
+        offset: (_page - 1) * _limit,
+        include: [
+          {
+            model: User,
           },
         ],
       });
 
       return res.status(200).json({
-        message: "Post found",
-        result: findPost,
+        message: `We Found Post ID: ${postId} !`,
+        result: {
+          post: findPost,
+          comment: findComment,
+        },
       });
     } catch (err) {
       console.log(err);

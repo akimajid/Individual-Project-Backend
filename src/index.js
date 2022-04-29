@@ -1,32 +1,41 @@
-const express = require("express")
-const cors = require("cors")
-const dotenv = require("dotenv")
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
 
-dotenv.config()
+dotenv.config();
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT;
 
-const { sequelize } = require("./lib/sequelize")
-sequelize.sync({ alter: true })
+const { sequelize } = require("./lib/sequelize");
+sequelize.sync({ alter: true });
 
-const app = express()
+const app = express();
 
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
 app.get("/", (req, res) => {
-    res.send("<h1>Individual project API</h1>")
-})
+  res.send("<h1>Individual project API</h1>");
+});
 
-const { authRoutes, postsRoutes, usersRoute } = require("./routes/index")
+const {
+  authRoutes,
+  postsRoutes,
+  usersRoute,
+  commentRoutes,
+} = require("./routes/index");
 
-app.use("/post_images", express.static(`${__dirname}/public/posts`))
-app.use("/profile_pictures", express.static(`${__dirname}/public/profile_pictures`))
+app.use("/post_images", express.static(`${__dirname}/public/posts`));
+app.use(
+  "/profile_pictures",
+  express.static(`${__dirname}/public/profile_pictures`)
+);
 
-app.use("/auth", authRoutes)
-app.use("/posts", postsRoutes)
-app.use("/users", usersRoute)
+app.use("/auth", authRoutes);
+app.use("/posts", postsRoutes);
+app.use("/users", usersRoute);
+app.use("/comments", commentRoutes);
 
 app.listen(PORT, () => {
-    console.log("Listening in port", PORT)
-})
+  console.log("Listening in port", PORT);
+});
