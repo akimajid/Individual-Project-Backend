@@ -24,6 +24,7 @@ const postControllers = {
           },
           {
             model: Comment,
+            include: User,
             order: [["createdAt", "DESC"]],
           },
         ],
@@ -180,72 +181,14 @@ const postControllers = {
   },
   getPostById: async (req, res) => {
     try {
-      const { _limit = 5, _page = 1 } = req.query;
-
-      delete req.query._limit;
-      delete req.query._page;
       const { postId } = req.params;
-      const findPost = await Post.findOne({
-        where: {
-          id: postId,
-        },
-        include: [
-          {
-            model: User,
-          },
-          {
-            model: Comment,
-          },
-        ],
-      });
-
-      const findComment = await Comment.findAll({
-        where: {
-          post_id: postId,
-        },
-        order: [["createdAt", "DESC"]],
-        limit: _limit ? parseInt(_limit) : undefined,
-        offset: (_page - 1) * _limit,
-        include: [
-          {
-            model: User,
-          },
-        ],
+      const data = await Post.findByPk(postId, {
+        include: [User, Comment]
       });
 
       return res.status(200).json({
-        message: `We Found Post ID: ${postId} !`,
-        result: {
-          post: findPost,
-          comment: findComment,
-        },
-      });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).json({
-        message: "Server error",
-      });
-    }
-  },
-  getPostByUserId: async (req, res) => {
-    try {
-      const { userId } = req.params;
-
-      const findPost = await Post.findAll({
-        where: {
-          user_id: userId,
-        },
-        include: [
-          {
-            model: User,
-            as: "user_post",
-          },
-        ],
-      });
-
-      return res.status(200).json({
-        message: "Post found",
-        result: findPost,
+        message: "get post succsess",
+        result: data,
       });
     } catch (err) {
       console.log(err);

@@ -20,6 +20,5 @@ router.delete("/:id", sessionAuthorizeLoggedInUser, postControllers.deletePostBy
 router.get("/:id/likes", postControllers.getLikePost);
 router.post("/:postId/likes/:userId", postControllers.likePost);
 router.get("/:postId", postControllers.getPostById)
-router.get("/user/:userId", postControllers.getPostByUserId)
 
 module.exports = router;
