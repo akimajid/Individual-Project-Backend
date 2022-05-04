@@ -181,14 +181,21 @@ const postControllers = {
   },
   getPostById: async (req, res) => {
     try {
-      const { postId } = req.params;
-      const data = await Post.findByPk(postId, {
-        include: [User, Comment]
+      const { id } = req.params;
+
+      const postsDetail = await Post.findByPk(id, {
+        include: [
+          {
+            model: Comment,
+            include: [{ model: User, attributes: ["id", "username"] }],
+          },
+          { model: User, attributes: ["username", "full_name", "profile_picture"] },
+        ],
       });
 
       return res.status(200).json({
         message: "get post succsess",
-        result: data,
+        result: postsDetail,
       });
     } catch (err) {
       console.log(err);

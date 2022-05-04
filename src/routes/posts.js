@@ -19,6 +19,6 @@ router.patch("/:id", sessionAuthorizeLoggedInUser, postControllers.editPostById)
 router.delete("/:id", sessionAuthorizeLoggedInUser, postControllers.deletePostById);
 router.get("/:id/likes", postControllers.getLikePost);
 router.post("/:postId/likes/:userId", postControllers.likePost);
-router.get("/:postId", postControllers.getPostById)
+router.get("/:id", postControllers.getPostById)
 
 module.exports = router;
