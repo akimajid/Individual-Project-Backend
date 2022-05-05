@@ -29,7 +29,7 @@ const postControllers = {
           },
         ],
         distinct: true,
-        order: _sortBy ? [[_sortBy, _sortDir]] : undefined,
+        order: [["createdAt", "DESC"]],
       });
 
       return res.status(200).json({
