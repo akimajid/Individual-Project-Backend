@@ -43,25 +43,75 @@ const userControllers = {
   },
   editProfile: async (req, res) => {
     try {
-      const { bio, username, email, full_name } = req.body;
+      const {
+        id,
+        bio,
+        username,
+        email,
+        full_name,
+        profile_picture,
+        is_verified,
+      } = req.body;
 
+      const isUsernameRegistered = await User.findOne({
+        where: { username },
+      });
+
+      if (isUsernameRegistered) {
+        return res.status(400).json({
+          message: "username already taken",
+        });
+      }
+
+      const updateData = {
+        id,
+        username,
+        bio,
+        email,
+        full_name,
+        profile_picture,
+        is_verified,
+      };
+      console.log(updateData);
+      const newProfile = await User.update(updateData, {
+        where: { id: req.token.user_id },
+      });
+
+      if (!newProfile) {
+        return res.status(400).json({
+          message: "data failed",
+        });
+      }
+
+      return res.status(201).json({
+        message: "profile create or edit succses",
+        result: { ...updateData },
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({
+        message: "Server error",
+      });
+    }
+  },
+  editProfilePicture: async (req, res) => {
+    try {
       const uploadFileDomain = process.env.UPLOAD_FILE_DOMAIN;
       const filePath = "profile_pictures";
       const { filename } = req.file;
 
-      const newProfile = await User.update({
-          full_name,
-          bio,
-          username,
-          email,
-          profile_picture: `${uploadFileDomain}/${filePath}/${filename}`
-      }, {
+      const newProfilePicture = await User.update(
+        {
+          profile_picture: `${uploadFileDomain}/${filePath}/${filename}`,
+        },
+        {
           where: {
-              id: req.token.user_id
-          }
-      })
+            id: req.token.user_id,
+          },
+        }
+      );
 
-      if (!newProfile) {
+      if (!newProfilePicture) {
         return res.status(400).json({
           message: "Edit failed",
         });
@@ -69,7 +119,7 @@ const userControllers = {
 
       return res.status(201).json({
         message: "Profile updated",
-        result: newProfile,
+        result: newProfilePicture,
       });
     } catch (err) {
       console.log(err);
