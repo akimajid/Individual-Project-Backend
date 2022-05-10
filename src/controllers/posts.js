@@ -129,19 +129,20 @@ const postControllers = {
   },
   getLikePost: async (req, res) => {
     try {
-      const { id } = req.params;
+      const {postId} = req.params
+      const user_id = req.token.user_id
 
-      const postLikes = await Like.findAll({
-        where: {
-          postId: id,
-        },
-        include: User,
-      });
+      const findLike = await Like.findOne({
+          where: {
+              post_id: postId,
+              user_id
+          }
+      })
 
       return res.status(200).json({
-        message: "Fetch likes",
-        result: postLikes,
-      });
+          message: "Find Successfully!",
+          result: findLike
+      })
     } catch (err) {
       console.log(err);
       return res.status(500).json({
@@ -151,36 +152,53 @@ const postControllers = {
   },
   likePost: async (req, res) => {
     try {
-      const { postId, userId } = req.params;
+      const {postId} = req.params
+            // const {user_id} = req.body
+            const user_id = req.token.user_id
 
-      const [didCreatePost] = await Like.findOrCreate({
-        where: {
-          post_id: postId,
-          user_id: userId,
-        },
-        defaults: {
-          ...req.body,
-        },
-      });
+            const findPost = await Post.findAll({
+                where: {
+                    id: postId
+                }
+            })
 
-      if (!didCreatePost) {
-        return res.status(400).json({
-          message: "User already liked post",
-        });
-      }
+            if (!findPost) {
+                return res.status(400).json({
+                    message: "Can't find this Post!"
+                })
+            }
 
-      await Post.increment(
-        { like_count: 1 },
-        {
-          where: {
-            id: postId,
-          },
-        }
-      );
+            const findUserLike = await Like.findOne({
+                where: {
+                    post_id: postId,
+                    user_id
+                }
+            })
 
-      return res.status(200).json({
-        message: "Liked post",
-      });
+            if (findUserLike) {
+                return res.status(400).json({
+                    message: "You Already Like This Post!"
+                })
+            }
+
+            const likePost = await Like.create({
+                post_id: postId,
+                user_id
+            })
+
+            await Post.increment({
+                like_count: 1
+            },
+            {
+                where: {
+                    id: postId,
+                }
+            })
+
+            return res.status(200).json({
+                message: "Liked post",
+                result: likePost
+            })
     } catch (err) {
       console.log(err);
       return res.status(500).json({
@@ -211,6 +229,60 @@ const postControllers = {
       return res.status(500).json({
         message: "Server error",
       });
+    }
+  },
+  unlikePost: async (req, res) => {
+    try {
+      const {postId} = req.params
+            const user_id = req.token.user_id
+
+            const findPost = await Post.findAll({
+                where: {
+                    id: postId
+                }
+            })
+
+            const findUserLike = await Like.findOne({
+                where: {
+                    post_id: postId,
+                    user_id
+                }
+            })
+
+            if (!findPost) {
+                return res.status(400).json({
+                    message: "Can't find this Post!"
+                })
+            }
+
+            if (!findUserLike) {
+            return res.status(400).json({
+                message: "You Already Unlike This Post!"
+            })}
+
+            await Post.decrement({
+                like_count: 1
+            }, {
+                where: {
+                    id: postId,
+                }
+            })
+
+            await Like.destroy({
+                where: {
+                    post_id: postId,
+                    user_id
+                }
+            })
+
+            return res.status(200).json({
+                message: "Unliked post"
+            })
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({
+        message: "Server error"
+      })
     }
   },
 };

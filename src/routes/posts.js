@@ -17,8 +17,9 @@ router.post(
 );
 router.patch("/:id", sessionAuthorizeLoggedInUser, postControllers.editPostById);
 router.delete("/:id", sessionAuthorizeLoggedInUser, postControllers.deletePostById);
-router.get("/:id/likes", postControllers.getLikePost);
-router.post("/:postId/likes/:userId", postControllers.likePost);
+router.get("/postlike/:postId", sessionAuthorizeLoggedInUser, postControllers.getLikePost);
+router.post("/postlike/:postId", sessionAuthorizeLoggedInUser, postControllers.likePost);
 router.get("/:id", postControllers.getPostById)
+router.delete("/postlike/:postId", sessionAuthorizeLoggedInUser, postControllers.unlikePost)
 
 module.exports = router;
