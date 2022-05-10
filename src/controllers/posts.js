@@ -73,23 +73,32 @@ const postControllers = {
   editPostById: async (req, res) => {
     try {
       const { id } = req.params;
+      const { caption } = req.body
 
-      const updatePost = await Post.update(
-        {
-          ...req.body,
-        },
-        {
-          where: {
-            id,
-            user_id: req.token.user_id,
-          },
+      const findPost = await Post.findOne({
+        where: {
+            id
         }
-      );
+    })
 
-      return res.status(200).json({
-        message: "Post updated",
-        result: updatePost,
-      });
+    if (!findPost) {
+        return res.status(400).json({
+            message: "Post not Found!"
+        })
+    }
+
+    await Post.update({
+        caption,
+    }, {
+        where: {
+            id,
+            user_id: req.token.user_id
+    }
+    })
+
+    return res.status(200).json({
+        message: "Post Updated!"
+    })
     } catch (err) {
       console.log(err);
       return res.status(500).json({
