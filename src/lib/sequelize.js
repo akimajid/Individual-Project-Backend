@@ -41,6 +41,9 @@ Comment.belongsTo(User, { foreignKey: "user_id" });
 Comment.belongsTo(Post, { foreignKey: "post_id" });
 Post.hasMany(Comment, { foreignKey: "post_id" });
 
+VerificationToken.belongsTo(User, {foreignKey: "user_id"})
+User.hasMany(VerificationToken, {foreignKey: "user_id"})
+
 module.exports = {
   sequelize,
   User,
