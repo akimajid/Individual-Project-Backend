@@ -7,7 +7,7 @@ router.post("/register", authControllers.registerUser)
 router.post("/login", authControllers.loginUser)
 router.get("/refresh-token", sessionAuthorizeLoggedInUser, authControllers.keepLogin)
 router.get("/verify/:token", authControllers.verifyUser)
-router.post("/resend-verification", authControllers.resendVerificationEmail)
+router.post("/resend-verification", sessionAuthorizeLoggedInUser, authControllers.resendVerificationEmail)
 router.post("/forgot-password-email", authControllers.sendForgotPasswordEmail)
 router.patch("/change-password-forgot", authControllers.changeUserForgotPassword)
 

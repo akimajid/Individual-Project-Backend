@@ -182,178 +182,192 @@ const authControllers = {
   },
   verifyUser: async (req, res) => {
     try {
-      const { token } = req.params
-      console.log(token)
-  
+      const { token } = req.params;
+      console.log(token);
+
       const findToken = await VerificationToken.findOne({
         where: {
           token,
           is_valid: true,
           valid_until: {
-            [Op.gt]: moment().utc()
-          }
-        }
-      })
-  
+            [Op.gt]: moment().utc(),
+          },
+        },
+      });
+
       if (!findToken) {
         return res.status(400).json({
-          message: "Your token is invalid"
-        })
+          message: "Your token is invalid",
+        });
       }
-  
-      await User.update({ is_verified: true }, {
-        where: {
-          id: findToken.user_id
+
+      await User.update(
+        { is_verified: true },
+        {
+          where: {
+            id: findToken.user_id,
+          },
         }
-      })
-  
-      findToken.is_valid = false
-      findToken.save()
-  
-      return res.redirect(`http://localhost:3000/verification-success?referral=${token}`)
+      );
+
+      findToken.is_valid = false;
+      findToken.save();
+
+      return res.redirect(
+        `http://localhost:3000/verification-success?referral=${token}`
+      );
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return res.status(500).json({
-        message: "Server error"
-      })
+        message: "Server error",
+      });
     }
   },
   resendVerificationEmail: async (req, res) => {
     try {
-      const { id } = req.token
+      const userId = req.token.user_id;
 
-      await VerificationToken.update({ is_valid: false }, {
-        where: {
-          is_valid: true,
-          user_id: id
-        }
-      })
+      const findUser = await User.findByPk(userId);
 
-      const verificationToken = nanoid(40)
+      if (findUser.is_verified) {
+        return res.status(400).json({
+          message: "User is already verified",
+        });
+      }
+
+      const verificationToken = nanoid(40);
 
       await VerificationToken.create({
         token: verificationToken,
         is_valid: true,
-        user_id: id,
-        valid_until: moment().add(1, "hour")
-      })
+        user_id: userId,
+        valid_until: moment().add(1, "hour"),
+      });
 
-      const findUser = await User.findByPk(id)
+      const verificationLink = `http://localhost:2020/auth/verify/${verificationToken}`;
 
-      const verificationLink = `http://localhost:2020/auth/verify/${verificationToken}`
-
-      const template = fs.readFileSync(__dirname + "/../templates/verify.html").toString()
+      const template = fs
+        .readFileSync(__dirname + "/../templates/verify.html")
+        .toString();
 
       const renderedTemplated = mustache.render(template, {
         username: findUser.username,
         verify_url: verificationLink,
-        full_name: findUser.full_name
-      })
+        full_name: findUser.full_name,
+      });
 
       await mailer({
         to: findUser.email,
         subject: "Verify your account!",
-        html: renderedTemplated
-      })
+        html: renderedTemplated,
+      });
 
-      return res.status(201).json({
-        message: "Resend verification email"
-      })
+      return res.status(200).json({
+        message: "Email sent",
+      });
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return res.status(500).json({
-        message: "Server error"
-      })
+        message: "Server error",
+      });
     }
   },
   sendForgotPasswordEmail: async (req, res) => {
     try {
-      const { email } = req.body
-      
+      const { email } = req.body;
+
       const findUser = await User.findOne({
         where: {
-          email
-        }
-      })
+          email,
+        },
+      });
 
-      const passwordToken = nanoid(40)
+      const passwordToken = nanoid(40);
 
-      await ForgotPasswordToken.update({ is_valid: false }, {
-        where: {
-          user_id: findUser.id,
-          is_valid: true
+      await ForgotPasswordToken.update(
+        { is_valid: false },
+        {
+          where: {
+            user_id: findUser.id,
+            is_valid: true,
+          },
         }
-      })
+      );
 
       await ForgotPasswordToken.create({
         token: passwordToken,
         valid_until: moment().add(1, "hour"),
         is_valid: true,
         user_id: findUser.id,
-      })
+      });
 
-      const forgotPasswordLink = `http://localhost:3000/forgot-password-token?fp_token=${passwordToken}`
+      const forgotPasswordLink = `http://localhost:3000/forgot-password-token?fp_token=${passwordToken}`;
 
-      const template = fs.readFileSync(__dirname + "/../templates/forgot.html").toString()
+      const template = fs
+        .readFileSync(__dirname + "/../templates/forgot.html")
+        .toString();
 
       const renderedTemplated = mustache.render(template, {
         username: findUser.username,
         forgot_password_url: forgotPasswordLink,
-        full_name: findUser.full_name
-      })
+        full_name: findUser.full_name,
+      });
 
       await mailer({
         to: findUser.email,
         subject: "Forgot password!",
-        html: renderedTemplated
-      })
+        html: renderedTemplated,
+      });
 
       return res.status(201).json({
-        message: "Resent verification email"
-      })
+        message: "Resent verification email",
+      });
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return res.status(500).json({
-        message: "Server error"
-      })
+        message: "Server error",
+      });
     }
   },
   changeUserForgotPassword: async (req, res) => {
     try {
-      const { password, forgotPasswordToken } = req.body
+      const { password, forgotPasswordToken } = req.body;
 
       const findToken = await ForgotPasswordToken.findOne({
         where: {
           token: forgotPasswordToken,
           is_valid: true,
           valid_until: {
-            [Op.gt]: moment().utc
-          }
-        }
-      })
+            [Op.gt]: moment().utc,
+          },
+        },
+      });
 
       if (!findToken) {
         return res.status(400).json({
-          message: "Invalid token"
-        })
+          message: "Invalid token",
+        });
       }
 
-      const hashedPassword = bcrypt.hashSync(password, 5)
+      const hashedPassword = bcrypt.hashSync(password, 5);
 
-      await User.update({ password: hashedPassword }, {
-        where: {
-          id: findToken.user_id
+      await User.update(
+        { password: hashedPassword },
+        {
+          where: {
+            id: findToken.user_id,
+          },
         }
-      })
+      );
 
       return res.status(200).json({
-        message: "Change password success"
-      })
+        message: "Change password success",
+      });
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return res.status(500).json({
-        message: "Server errror"
-      })
+        message: "Server errror",
+      });
     }
   },
 };
