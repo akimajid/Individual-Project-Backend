@@ -301,7 +301,7 @@ const authControllers = {
         user_id: findUser.id,
       });
 
-      const forgotPasswordLink = `http://localhost:3000/forgot-password-token?fp_token=${passwordToken}`;
+      const forgotPasswordLink = `http://localhost:3000/change-forgot-password/${passwordToken}`;
 
       const template = fs
         .readFileSync(__dirname + "/../templates/forgot.html")
@@ -331,17 +331,23 @@ const authControllers = {
   },
   changeUserForgotPassword: async (req, res) => {
     try {
-      const { password, forgotPasswordToken } = req.body;
+      const { password } = req.body;
+      const { token } = req.params;
+      console.log(password);
+
+      console.log(token);
 
       const findToken = await ForgotPasswordToken.findOne({
         where: {
-          token: forgotPasswordToken,
+          token,
           is_valid: true,
           valid_until: {
-            [Op.gt]: moment().utc,
+            [Op.gt]: moment().utc(),
           },
         },
       });
+
+      console.log(findToken);
 
       if (!findToken) {
         return res.status(400).json({
@@ -356,6 +362,16 @@ const authControllers = {
         {
           where: {
             id: findToken.user_id,
+          },
+        }
+      );
+
+      await ForgotPasswordToken.update(
+        { is_valid: false },
+        {
+          where: {
+            user_id: findToken.id,
+            is_valid: true,
           },
         }
       );
